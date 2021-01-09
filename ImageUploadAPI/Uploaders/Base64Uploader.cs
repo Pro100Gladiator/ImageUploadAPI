@@ -52,9 +52,14 @@ namespace ImageUploadAPI.Uploaders
                 try
                 {
                     string picPath = _environment.WebRootPath + "\\Upload\\";
+                    string previewPath = _environment.WebRootPath + "\\Preview\\";
                     if (!Directory.Exists(picPath))
                     {
                         Directory.CreateDirectory(picPath);
+                    }
+                    if (!Directory.Exists(previewPath))
+                    {
+                        Directory.CreateDirectory(previewPath);
                     }
 
                     foreach (var pic in images)
@@ -81,7 +86,7 @@ namespace ImageUploadAPI.Uploaders
                             curCounter++;
                             result += $"Picture {curCounter} successfully downloaded.\n";
                         }
-                        Previewer.uploadPreview(picPath, name + "." + type);
+                        Previewer.uploadPreview(picPath, previewPath, name + "." + type);
                     }
                     return result + $"Total pictures uploaded: {successCounter} from {curCounter}";
                 }

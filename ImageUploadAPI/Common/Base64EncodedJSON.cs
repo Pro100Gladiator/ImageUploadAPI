@@ -34,7 +34,9 @@ namespace ImageUploadAPI.Common
             return (!string.IsNullOrWhiteSpace(Name)) ? Name : GetUniqueName();
         }
 
+#pragma warning disable CS0108 // 'Base64EncodedJSON.GetType()' hides inherited member 'object.GetType()'. Use the new keyword if hiding was intended.
         public string GetType()
+#pragma warning restore CS0108 // 'Base64EncodedJSON.GetType()' hides inherited member 'object.GetType()'. Use the new keyword if hiding was intended.
         {
             if (Base64.StartsWith("url", true, null))
                return GetTypeFromBase64(DeleteUrlFromBase64(Base64));

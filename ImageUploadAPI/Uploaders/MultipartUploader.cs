@@ -32,9 +32,14 @@ namespace ImageUploadAPI.Uploaders
                 try
                 {
                     string picPath = _environment.WebRootPath + "\\Upload\\";
+                    string previewPath = _environment.WebRootPath + "\\Preview\\";
                     if (!Directory.Exists(picPath))
                     {
                         Directory.CreateDirectory(picPath);
+                    }
+                    if (!Directory.Exists(previewPath))
+                    {
+                        Directory.CreateDirectory(previewPath);
                     }
 
                     string result = "";
@@ -52,14 +57,15 @@ namespace ImageUploadAPI.Uploaders
                             curCounter++;
                             result += $"Picture {curCounter} successfully downloaded.\n";
                         }
-                        Previewer.uploadPreview(picPath, pic.FileName);
+                        Previewer.uploadPreview(picPath, previewPath, pic.FileName);
                     }
                     return result + $"Total pictures uploaded: {successCounter} from {curCounter}";
                 }
                 catch (Exception ex)
                 {
                     //TODO: log error: ex.Message.ToString()
-                    return "Error. Please, try again.";
+                    //return "Error. Please, try again.";
+                    return ex.Message.ToString();
                 }
             }
             else

@@ -26,11 +26,15 @@ namespace ImageUploadAPI.Controllers
         public ImageUploadController(IWebHostEnvironment environment)
         {
             _environment = environment;
+
+            formUploader = new MultipartUploader(_environment);
+            urlUploader = new UrlUploader(_environment);
+            jsonUploader = new Base64Uploader(_environment);
         }
 
-        MultipartUploader formUploader = new MultipartUploader(_environment);
-        UrlUploader urlUploader = new UrlUploader(_environment);
-        Base64Uploader jsonUploader = new Base64Uploader(_environment);
+        MultipartUploader formUploader;
+        UrlUploader urlUploader;
+        Base64Uploader jsonUploader;
 
         [HttpPost]
         [Consumes("multipart/form-data")]

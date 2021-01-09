@@ -19,11 +19,12 @@ namespace ImageUploadAPI.Common
 {
     public class Previewer
     {
-        public static void uploadPreview(string path, string picNameAndExt)
+        public static void uploadPreview(string pathFrom, string pathTo, string picNameAndExt)
         {
-            var image = Image.FromFile(path + picNameAndExt);
+            var image = Image.FromFile(pathFrom + picNameAndExt);
             var preview = resizeImage(image, new Size(100, 100));
-            preview.Save($"{path}preview_{picNameAndExt}");
+            preview.Save($"{pathTo}preview_{picNameAndExt}");
+            image.Dispose();
         }
 
         private static Image resizeImage(Image imgToResize, Size size)
