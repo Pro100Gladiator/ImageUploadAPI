@@ -7,6 +7,10 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\ForUploadTest\" />
+    <Folder Include="wwwroot\ForUploadTest\" />
+    <Folder Include="wwwroot\TestDownload\" />
+    <Folder Include="wwwroot\Upload\" />
+    <Folder Include="wwwroot\Preview\" />
     <Folder Include="wwwroot\Preview\" />
     <Folder Include="wwwroot\Upload\" />
   </ItemGroup>

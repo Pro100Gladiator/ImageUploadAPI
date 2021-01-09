@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using MimeTypeExtension;
 using ImageUploadAPI.Common;
 using System.Drawing;
+using ImageUploadAPI.Uploaders;
 
 namespace ImageUploadAPI.Controllers
 {
@@ -27,48 +28,16 @@ namespace ImageUploadAPI.Controllers
             _environment = environment;
         }
 
+        MultipartUploader formUploader = new MultipartUploader(_environment);
+        UrlUploader urlUploader = new UrlUploader(_environment);
+        Base64Uploader jsonUploader = new Base64Uploader(_environment);
+
         [HttpPost]
         [Consumes("multipart/form-data")]
         [Produces("application/json")]
         public async Task<string> ProcessMultipart([FromForm] FileUpload input)
         {
-
-            if (input?.Pictures?.Count > 0)
-            {
-                try
-                {
-                    string picPath = _environment.WebRootPath + "\\Upload\\";
-                    if (!Directory.Exists(picPath))
-                    {
-                        Directory.CreateDirectory(picPath);
-                    }
-
-                    string result="";
-                    int successCounter = 0;
-                    int curCounter = 0;
-
-                    foreach (var pic in input.Pictures)
-                    {
-                        using (FileStream fileStream = System.IO.File.Create(picPath + pic.FileName))
-                        {
-                            pic.CopyTo(fileStream);
-                            fileStream.Flush();
-
-                            successCounter++;
-                            curCounter++;
-                            result += $"Picture {curCounter} successfully downloaded.\n";
-                        }
-                        uploadPreview(picPath, pic.FileName);
-                    }
-                    return result + $"Total pictures uploaded: {successCounter} from {curCounter}";
-                }
-                catch (Exception ex)
-                {
-                    return ex.Message.ToString();
-                }
-            }
-            else
-                return "Unsucsessful uploading. Please, try again.";
+            return formUploader.Process(input);
             
         }
 
@@ -77,71 +46,7 @@ namespace ImageUploadAPI.Controllers
         [Produces("application/json")]
         public async Task<string> ProcessJSON([FromBody] JsonElement input)
         {
-            var json = input.ToString();
-
-            if (String.IsNullOrWhiteSpace(json))
-                return "JSON is empty.";
-
-            List<Base64EncodedJSON> images;
-
-            try
-            {
-                images = JsonConvert.DeserializeObject<List<Base64EncodedJSON>>(json);
-            }
-            catch (Exception ex)
-            {
-                return "Error in convetsation: " + ex.Message;
-            }
-
-            string result="";
-            int successCounter = 0;
-            int curCounter = 0;
-
-            if (images?.Count > 0)
-            {
-                try
-                {
-                    string picPath = _environment.WebRootPath + "\\Upload\\";
-                    if (!Directory.Exists(picPath))
-                    {
-                        Directory.CreateDirectory(picPath);
-                    }
-
-                    foreach (var pic in images)
-                    {
-                        string type = pic.GetType();
-                        if (string.IsNullOrWhiteSpace(type))
-                        {
-                            result += $"Picture {curCounter} can not be loaded - because it have invalid image type.\r\n";
-                            curCounter++;
-                            continue;
-                        }                           
-
-                        string name = pic.GetName();
-
-
-                        //TODO: problem with same name files
-                        var base64 = pic.GetBase64();
-                        using (FileStream fileStream = System.IO.File.Create(picPath + name + "." + type))
-                        {
-                            fileStream.Write(Convert.FromBase64String(base64));
-                            fileStream.Flush();
-
-                            successCounter++;
-                            curCounter++;
-                            result += $"Picture {curCounter} successfully downloaded.\n";
-                        }
-                        uploadPreview(picPath, name + "." + type);
-                    }
-                    return result + $"Total pictures uploaded: {successCounter} from {curCounter}";
-                }
-                catch (Exception ex)
-                {
-                    return ex.Message.ToString();
-                }
-            }
-            else
-                return "Unsucsessful uploading. Please, try again.";               
+            return jsonUploader.Process(input);
         }
 
         [HttpPost]
@@ -149,62 +54,9 @@ namespace ImageUploadAPI.Controllers
         [Produces("application/json")]
         public async Task<string> ProcessURLs([FromForm] FileUpload input)
         {
-            if (input?.Urls?.Count > 0)
-            {
-                try
-                {
-                    string picPath = _environment.WebRootPath + "\\Upload\\";
-                    if (!Directory.Exists(picPath))
-                    {
-                        Directory.CreateDirectory(picPath);
-                    }
-
-                    string result = "";
-                    int successCounter = 0;
-                    int curCounter = 0;
-
-                    foreach (var url in input.Urls)
-                    {
-                        string nameNExt = "";
-                        if (url.Split('/').Length > 0)
-                            nameNExt = url.Split('/')[url.Split('/').Length - 1];
-                        else
-                            return "URL is empty";
-
-                        using (WebClient client = new WebClient())
-                        {
-                            client.DownloadFile(new Uri(url), picPath + nameNExt);
-
-                            successCounter++;
-                            curCounter++;
-                            result += $"Picture {curCounter} successfully downloaded.\n";
-                        }
-
-                        uploadPreview(picPath, nameNExt);
-                    }
-
-                    return result + $"Total pictures uploaded: {successCounter} from {curCounter}";
-                }
-                catch (Exception ex)
-                {
-                    return ex.Message.ToString();
-                }
-            }
-            else
-                return "Failed.";
+            return urlUploader.Process(input);
         }
 
-        private void uploadPreview(string path, string picNameAndExt)
-        {
-            var image = Image.FromFile(path + picNameAndExt);
-            var preview = resizeImage(image, new Size(100, 100));
-            preview.Save($"{path}preview_{picNameAndExt}");
-        }
-
-        private static Image resizeImage(Image imgToResize, Size size)
-        {
-            return (Image)(new Bitmap(imgToResize, size));            
-        }
 
         #region Some Help
 
