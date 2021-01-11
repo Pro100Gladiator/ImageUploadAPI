@@ -48,7 +48,10 @@ namespace ImageUploadAPI.Uploaders
 
                     foreach (var pic in input.Pictures)
                     {
-                        using (FileStream fileStream = System.IO.File.Create(picPath + pic.FileName))
+                        string fileName = pic.FileName;
+                        fileName = Helpers.GetUniqueName(fileName, picPath);
+
+                        using (FileStream fileStream = System.IO.File.Create(picPath + fileName))
                         {
                             pic.CopyTo(fileStream);
                             fileStream.Flush();
@@ -57,7 +60,7 @@ namespace ImageUploadAPI.Uploaders
                             curCounter++;
                             result += $"Picture {curCounter} successfully downloaded.\n";
                         }
-                        Previewer.uploadPreview(picPath, previewPath, pic.FileName);
+                        Previewer.uploadPreview(picPath, previewPath, fileName);
                     }
                     return result + $"Total pictures uploaded: {successCounter} from {curCounter}";
                 }

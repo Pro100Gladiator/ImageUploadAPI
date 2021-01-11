@@ -57,6 +57,7 @@ namespace ImageUploadAPI.Uploaders
 
                         using (WebClient client = new WebClient())
                         {
+                            nameNExt = Helpers.GetUniqueName(nameNExt, picPath);
                             client.DownloadFile(new Uri(url), picPath + nameNExt);
 
                             successCounter++;

@@ -73,11 +73,12 @@ namespace ImageUploadAPI.Uploaders
                         }
 
                         string name = pic.GetName();
-
-
-                        //TODO: problem with same name files
                         var base64 = pic.GetBase64();
-                        using (FileStream fileStream = System.IO.File.Create(picPath + name + "." + type))
+
+                        string fileName = name + "." + type;
+                        fileName = Helpers.GetUniqueName(fileName, picPath);
+
+                        using (FileStream fileStream = System.IO.File.Create(picPath + fileName))
                         {
                             fileStream.Write(Convert.FromBase64String(base64));
                             fileStream.Flush();
@@ -86,7 +87,7 @@ namespace ImageUploadAPI.Uploaders
                             curCounter++;
                             result += $"Picture {curCounter} successfully downloaded.\n";
                         }
-                        Previewer.uploadPreview(picPath, previewPath, name + "." + type);
+                        Previewer.uploadPreview(picPath, previewPath, fileName);
                     }
                     return result + $"Total pictures uploaded: {successCounter} from {curCounter}";
                 }
